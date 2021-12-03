@@ -1,64 +1,60 @@
-from collections import Counter, defaultdict
+from aocd import get_data, transforms
 
-with open('3.txt') as f:
-    data = [list(line.strip()) for line in f.readlines()]
+from collections import Counter
 
+data = get_data(day=3, year=2021)
+lines = transforms.lines(data)
+columns = list(zip(*lines))
 
-# gamma rate epsilon rate
-#
+def part_one():
+    '''
+    Pass in each column of the binary numbers into a Counter to quickly retrieve
+    the most common and least common bits per index.
+    Convert using builtin int(str, base=10) with base 2 to convert to decimal
+    '''
+    bits = [Counter(c) for c in columns]
+    gamma, epsilon = '', ''
+    for freq in bits:
+        gamma += freq.most_common()[0][0]
+        epsilon += freq.most_common()[1][0]
+    
+    
+    gamma = int(gamma, 2)
+    epsilon = int(epsilon, 2)
 
-bits = {}
-i = 0
-for d in zip(*data):
-    bits[i] = Counter(d)
-    i += 1
+    return gamma * epsilon
 
-gamma = [''] * 12
-epsilon = [''] * 12
-for i in range(12):
-    gamma[i] = bits[i].most_common()[0][0]
-    epsilon[i] = bits[i].most_common()[1][0]
+def part_two():
+    '''
+    Iterate over the total number of columns,
+    each time building the respective count of bits for that particular element.
 
-gamma = int(''.join(gamma), 2)
-epsilon = int(''.join(epsilon), 2)
-
-# print(gamma * epsilon)
-
-def part_two(bits):
-    obits = bits.copy()
-    cbits = bits.copy()
-
-    oxygen = [''] * 12
-    C02 = [''] * 12
-    o, c = data.copy(), data.copy()
+    Filter using a list comprehension based on which one is more common.
+    Guard using the length of the lists (oxy, carbon)
+    '''
+    oxy = lines.copy()
+    carbon = lines.copy()
     for i in range(12):
-        if len(o) > 1:
-            ones, zeros = obits[i]['1'], obits[i]['0']
-            if ones >= zeros:
-                o = [num for num in o if num[i] == '1']
-            elif ones < zeros:
-                o = [num for num in o if num[i] == '0']
-            j = 0
-            for x in zip(*o):
-                obits[j] = Counter(x)
-                j += 1
-
-    for i in range(12):
-        if len(c) > 1:
-            ones, zeros = cbits[i]['1'], cbits[i]['0']
-            if ones < zeros:
-                c = [num for num in c if num[i] == '1']
+        bits = Counter(num[i] for num in oxy)
+        if len(oxy) > 1:
+            if bits['1'] >= bits['0']:
+                oxy = [num for num in oxy if num[i] == '1']
             else:
-                c = [num for num in c if num[i] == '0']
-            j = 0
-            for x in zip(*c):
-                cbits[j] = Counter(x)
-                j += 1
+                oxy = [num for num in oxy if num[i] != '1']
+    
+    for i in range(12):
+        bits = Counter(num[i] for num in carbon)
+        if len(carbon) > 1:
+            if bits['1'] < bits['0']:
+                carbon = [num for num in carbon if num[i] == '1']
+            else:
+                carbon = [num for num in carbon if num[i] != '1']
 
-    print(o, c)        
-    oxygen = int(''.join(o[0]), 2)
-    C02 = int(''.join(c[0]), 2)
-    print(oxygen, C02)
-    print(oxygen * C02)
 
-part_two(bits)
+    oxygen_rating = int(''.join(oxy[0]), 2)
+    co2_rating = int(''.join(carbon[0]), 2)
+
+    return oxygen_rating * co2_rating
+
+print(f'The power consumption of the submarine is : {part_one()}')
+print(f'The life support rating of the submarine is: {part_two()}')
