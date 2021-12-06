@@ -9,7 +9,7 @@ data = get_data(day=6, year=2021)
 def lanternfish(days):
     nums = Counter(list(map(int, data.split(',')))) + Counter({i : 0 for i in range(9)})
     for _ in range(days):
-        next_nums = Counter(nums)
+        next_nums = nums.copy()
         for num, count in nums.items():
             if num == 0:
                 next_nums[6] += count
