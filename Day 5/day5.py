@@ -24,8 +24,6 @@ def fill(points, line, diag=False):
             points[(x1 + dx, y1 + dy)] += 1
             x1 += dx
             y1 += dy
-        
-
 
 def find_overlaps(points):
     return sum(v > 1 for v in points.values())
